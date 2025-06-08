@@ -54,11 +54,17 @@ end
 
 module DayMap = Map.Make(DayKey)
 
+type day_spec = {
+  name: string;
+  pos: int;
+}
+
+
 let m =
   let open DayMap in 
     empty
-    |> add Mon "Monday"
-    |> add Tue "Tuesday"
+    |> add Mon {name = "Monday"; pos = 1}  (* The value in the map can be any value type, as long as its the same for all values.*)
+    |> add Tue {name = "Tuesday"; pos = 2}
 
 
 let has_mon = DayMap.mem Mon m
@@ -70,5 +76,5 @@ let val_of_key = DayMap.find Mon
   bindings is also from Map.S sig *)
 
 (* Obviously the map m is immutable. *)
-let m' = DayMap.add Fri "Friday" m
+let m' = DayMap.add Fri {name="Friday"; pos=5} m
 
