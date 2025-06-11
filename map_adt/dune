@@ -1,4 +1,4 @@
 (executable
  (name main)
- (public_name map)
- (libraries ounit2 map))
+ (public_name makingmaps)
+ (libraries ounit2 makingmap))
