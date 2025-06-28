@@ -1,0 +1,5 @@
+(executable
+ (name main)
+ (public_name calculator)
+ (libraries ounit2 calc))
+(env (dev (flags (:standard -warn-error -A))))

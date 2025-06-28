@@ -59,6 +59,103 @@ module BstSet : Set = struct
          else if  x > v then mem x l
          else true
 
-   let rec insert x s = failwith "unimplemented"
+   (** [insert x s]  
+      The insertion order of the values into the set matters in terms of the balance of the tree.
+      For example, if the vals are inserted in ascending order, then the tree will be imbalanced
+      to the right, hence giving it the same efficiency as a list, which is linear (O(n)). 
+      The performance of an ascending insert into the BST is 2-3x greater than the List implementation.
+      On the otherhand, random order insert is an order of magnitude better than the List. 
+      
+      The best case BST would look something like this..
+                           4
+                        /     \
+                       2       6
+                     /   \   /   \
+                    1     3 5     7
+      *)
+   let rec insert x = function
+      | Leaf -> Node (Leaf, x, Leaf) (* With an empty tree, we create a node with x as the value 
+                                        and 2 empty trees left and right. *)
+      | Node (l, v, r) as node -> 
+         if x < v then Node (insert x l, v, r)
+         else if x > v then Node (l, v, insert x r)
+         else node
+
 
 end
+
+module RedBlackTree : Set = struct
+   (* A Red Black tree is one type of data structure which attempts to deal with imbalanced BSTs.
+      RI: 
+         + Its a BST.
+         + No red node has a red child.
+         + Every path from root to leaf has the same number of black nodes.
+          *)
+   (** AF: [Leaf] is the empty set. [Node (c, l, v, r)] is the set containing [v] as well as all the
+           all the elements of the sets [l] and [r].  
+       RI: The BST invariant holds, as well as the RB Tree invariants. *)
+   type colour = Red | Black
+
+   type 'a t = Leaf | Node of (colour * 'a t * 'a * 'a t)
+
+   let empty = Leaf
+
+   let rec mem x = function
+   | Leaf -> false
+   | Node (_, l, v, r) -> 
+      if x < v then mem x r
+      else if  x > v then mem x l
+      else true
+
+
+   (** [balance c l v r] implements the 4 possible rotations (ONLY 4) that could be necessary to 
+       balance a node and restore the RI clause about red nodes.  *)
+   let balance = function
+   | (Black, Node (Red, Node (Red, a, x, b), y, c), z, d)
+   | (Black, Node (Red, a, x, Node (Red, b, y, c)), z, d)
+   | (Black, a, x, Node (Red, Node (Red, b, y, c), z, d))
+   | (Black, a, x, Node (Red, b, y, Node (Red, c, z, d)))
+   -> Node (Red, Node (Black, a, x, b), y, Node (Black, c, z, d))
+   | t -> Node t
+
+   let rec insert_aux x = function
+      | Leaf -> Node (Red, Leaf, x, Leaf)  (* colour new node Red *)
+      | Node (c, l, v, r) as n ->
+         if x < v then balance (c, insert_aux x l, v, r)
+         else if x > v then balance (c, l, v, insert_aux x r)
+         else n
+
+   let rec insert x s =
+      match insert_aux x s with
+      | Leaf -> failwith "impossible"  (* [insert_aux] can not return a Leaf. *)
+      | Node (_, l, v, r) -> Node (Black, l, v, r)  (* colour the root black. *)
+
+
+end
+
+(* 
+   let s = empty |> insert 5 |> insert 4 |> insert 9 |> insert 8 |> insert 1;;
+
+Node 
+   (
+      Node (
+         Node (
+            Leaf, 
+            1, 
+            Leaf
+         ), 
+         4, 
+         Leaf
+      ), 
+      5,
+      Node (
+         Node (
+            Leaf, 
+            8, 
+            Leaf
+         ), 
+         9, 
+         Leaf
+      )
+   ) 
+*)

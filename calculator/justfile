@@ -1,0 +1,2 @@
+lex-build:
+    cd lib && ocamllex lexer.mll && ocamlyacc parser.mly && cd ..
